@@ -10,18 +10,32 @@ static const char *const TAG = "waveshare_epaper";
 
 void GDEW029Z13::initialize() {
 	ESP_LOGI(TAG, "GDEW029Z13::initialize");
-	this->reset_();
+	int i;
+	for(i = 0; i < 3; i++){
+		this->reset_pin_->digital_write(false);
+		delay(10);
+		this->reset_pin_->digital_write(true);
+		delay(10);
+	}
+
+	// Power ON (PON)
+	this->command(0x04);
+	this->wait_until_idle_();
+
 	// Panel Setting (PSR)
 	this->command(0x00);
-	this->data(0x8f);
+	this->data(0x0f);
+
+	// Resolution Setting (TRES)
+	this->command(0x61);
+	this->data(0x80); // 128 horizontal
+	this->data(0x01); // 296 vertical
+	this->data(0x28);
 
 	// VCOM And Data Interval Setting (CDI)
 	this->command(0x50);
 	this->data(0x77);
 
-	// Power ON (PON)
-	this->command(0x04);
-	this->wait_until_idle_();
 	ESP_LOGI(TAG, "GDEW029Z13::initialize done");
 }
 
@@ -39,16 +53,16 @@ void HOT GDEW029Z13::display() {
   for (size_t i = 0; i < this->get_buffer_length_(); i++)
     this->write_byte(0xFF);
   this->end_data_();
-  delay(2);
 
   // COMMAND DISPLAY REFRESH
   this->command(0x12);
+  delay(10);
   this->wait_until_idle_();
 
   // COMMAND POWER OFF
   // NOTE: power off < deep sleep
   this->command(0x02);
- ESP_LOGI(TAG, "GDEW029Z13::display done");
+  ESP_LOGI(TAG, "GDEW029Z13::display done");
 }
 
 void GDEW029Z13::dump_config() {
@@ -58,10 +72,6 @@ void GDEW029Z13::dump_config() {
   LOG_PIN("  DC Pin: ", this->dc_pin_);
   LOG_PIN("  Busy Pin: ", this->busy_pin_);
   LOG_UPDATE_INTERVAL(this);
-}
-
-void GDEW029Z13::set_full_update_every(uint32_t full_update_every) {
-  this->full_update_every_ = full_update_every;
 }
 
 }  // namespace waveshare_epaper
