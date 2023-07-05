@@ -9,7 +9,6 @@ namespace waveshare_epaper {
 static const char *const TAG = "waveshare_epaper";
 
 void GDEW029Z13::initialize() {
-	ESP_LOGI(TAG, "GDEW029Z13::initialize");
 	int i;
 	for(i = 0; i < 3; i++){
 		this->reset_pin_->digital_write(false);
@@ -35,12 +34,9 @@ void GDEW029Z13::initialize() {
 	// VCOM And Data Interval Setting (CDI)
 	this->command(0x50);
 	this->data(0x77);
-
-	ESP_LOGI(TAG, "GDEW029Z13::initialize done");
 }
 
 void HOT GDEW029Z13::display() {
- ESP_LOGI(TAG, "GDEW029Z13::display");
   // COMMAND DATA START TRANSMISSION 1 (B/W data)
   this->command(0x10);
   this->start_data_();
@@ -62,7 +58,6 @@ void HOT GDEW029Z13::display() {
   // COMMAND POWER OFF
   // NOTE: power off < deep sleep
   this->command(0x02);
-  ESP_LOGI(TAG, "GDEW029Z13::display done");
 }
 
 void GDEW029Z13::dump_config() {
